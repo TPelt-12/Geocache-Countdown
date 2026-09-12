@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>The Final Wait</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      background:
+        radial-gradient(circle at top, #263326, #101510 70%);
+
+      color: white;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      text-align: center;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 650px;
+
+      background: rgba(0, 0, 0, 0.35);
+
+      padding: 45px 30px;
+
+      border-radius: 20px;
+
+      border: 1px solid rgba(255,255,255,0.10);
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .icon {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      color: #b7c5b7;
+      font-size: 16px;
+    }
+
+    #timer {
+      font-size: clamp(48px, 12vw, 90px);
+
+      font-weight: 700;
+
+      letter-spacing: 4px;
+
+      margin: 45px 0 20px;
+
+      color: #8ed081;
+
+      font-variant-numeric: tabular-nums;
+    }
+
+    .warning {
+      color: #aaa;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .warning strong {
+      color: #ddd;
+    }
+
+    #unlockArea {
+      display: none;
+
+      margin-top: 35px;
+
+      padding: 30px;
+
+      background: rgba(94, 160, 79, 0.13);
+
+      border: 1px solid #5ea04f;
+
+      border-radius: 15px;
+
+      animation: appear 1s ease;
+    }
+
+    #unlockArea h2 {
+      color: #8ed081;
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    #coordinates {
+      margin-top: 20px;
+
+      font-size: clamp(24px, 7vw, 38px);
+
+      font-weight: bold;
+
+      line-height: 1.6;
+
+      letter-spacing: 1px;
+    }
+
+    .complete {
+      color: #8ed081 !important;
+    }
+
+    @keyframes appear {
+
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="icon">🧭</div>
+
+  <h1>THE FINAL WAIT</h1>
+
+  <div class="subtitle">
+    Your destination will reveal itself when the time expires.
+  </div>
+
+
+  <div id="timer">
+    01:00:00
+  </div>
+
+
+  <div class="warning" id="warning">
+
+    Keep this page open.
+
+    <br>
+
+    <strong>Refreshing this page will restart the countdown.</strong>
+
+  </div>
+
+
+  <div id="unlockArea">
+
+    <h2>🔓 LOCATION UNLOCKED</h2>
+
+    <p>
+      Your wait is over.
+    </p>
+
+    <div id="coordinates"></div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /*
+  =========================================
+  COUNTDOWN
+  =========================================
+  */
+
+  const COUNTDOWN_SECONDS = 60 * 60;
+
+  let timeRemaining = COUNTDOWN_SECONDS;
+
+
+  const timer =
+    document.getElementById("timer");
+
+  const unlockArea =
+    document.getElementById("unlockArea");
+
+  const coordinates =
+    document.getElementById("coordinates");
+
+  const warning =
+    document.getElementById("warning");
+
+
+  /*
+  =========================================
+  HIDDEN COORDINATE DATA
+
+  These numbers represent the coordinates.
+
+  The actual readable coordinates are NOT
+  stored anywhere in the HTML.
+  =========================================
+  */
+
+
+  const hidden = [
+
+    23,127,20,126,12,122,15,127,21,126,
+    29,122,22,126,18,127,21,122,24,127,
+    30,126,25,122,20,127,27,126,74,122,
+    23,127,25,126,12,122,13,127,20,126
+
+  ];
+
+
+  const key = [
+    89, 64, 75, 82, 38
+  ];
+
+
+  function revealSecret() {
+
+    let result = "";
+
+    for (
+      let i = 0;
+      i < hidden.length;
+      i++
+    ) {
+
+      result += String.fromCharCode(
+        hidden[i] ^
+        key[i % key.length]
+      );
+
+    }
+
+    coordinates.innerHTML =
+      result.replace("|", "<br>");
+
+  }
+
+
+  /*
+  =========================================
+  TIMER DISPLAY
+  =========================================
+  */
+
+
+  function updateTimer() {
+
+    const hours =
+      Math.floor(
+        timeRemaining / 3600
+      );
+
+    const minutes =
+      Math.floor(
+        (timeRemaining % 3600) / 60
+      );
+
+    const seconds =
+      timeRemaining % 60;
+
+
+    timer.textContent =
+
+      String(hours).padStart(2, "0")
+
+      + ":" +
+
+      String(minutes).padStart(2, "0")
+
+      + ":" +
+
+      String(seconds).padStart(2, "0");
+
+
+    /*
+    TIMER FINISHED
+    */
+
+    if (timeRemaining <= 0) {
+
+      clearInterval(countdown);
+
+      timer.textContent =
+        "UNLOCKED";
+
+      timer.classList.add(
+        "complete"
+      );
+
+      warning.style.display =
+        "none";
+
+      revealSecret();
+
+      unlockArea.style.display =
+        "block";
+
+      return;
+
+    }
+
+
+    timeRemaining--;
+
+  }
+
+
+  updateTimer();
+
+
+  const countdown =
+    setInterval(
+      updateTimer,
+      1000
+    );
+
+</script>
+
+</body>
+</html>
